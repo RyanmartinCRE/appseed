@@ -73,7 +73,20 @@ st.markdown("""
 with st.form("app_idea_form"):
     number_of_outputs = st.selectbox("🔢 How many formats do you want to generate?", [1, 2, 3])
     all_formats = ["App", "Chatbot", "Website"]
-    selected_formats = st.multiselect("🛠️ Select output formats", all_formats, default=["App"], max_selections=number_of_outputs)
+    selected_formats = st.multiselect(
+        "🛠️ Select output formats",
+        all_formats,
+        default=["App"]
+    )
+
+    if len(selected_formats) > int(number_of_outputs):
+        st.warning(f"⚠️ Please select up to {number_of_outputs} formats.")
+        st.stop()
+
+    if len(selected_formats) == 0:
+        st.warning("⚠️ Please select at least one output format.")
+        st.stop()
+
     category = st.selectbox("📂 Choose a category", [
         "Productivity", "Social", "Finance", "Health", "Education", "Fun / Playful", "AI / Tools", "Other"
     ])
@@ -154,12 +167,12 @@ if submitted and app_idea.strip():
 # --- Display Results ---
 if "results" in st.session_state and st.session_state.results:
     st.markdown("## 💡 Your Generated Concepts")
-
     st.markdown("<div class='output-container'>", unsafe_allow_html=True)
 
     for fmt in st.session_state.results:
         key_base = fmt.lower().replace(" ", "_")
         result = st.session_state.results[fmt]
+
         with st.container():
             st.markdown(f"<div class='output-box'>", unsafe_allow_html=True)
             view_mode = st.radio(
