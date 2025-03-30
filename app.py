@@ -49,14 +49,21 @@ st.markdown("""
         width: 96%;
         margin: 0 auto;
     }
-    .banner-bg {
-        background: linear-gradient(120deg, rgba(62,207,142,0.25), rgba(0,97,255,0.25));
-        border-radius: 20px;
-        padding: 2rem 1rem;
-        margin-bottom: 1.5rem;
-        text-align: center;
+    .preview-card {
+        background-color: #ffffff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 1px 8px rgba(0,0,0,0.04);
     }
-    h1, h2, h3, h4 {
+    .banner-bg {
+        background: linear-gradient(135deg, #3ECF8E, #0061ff);
+        border-radius: 20px;
+        padding: 3rem 1rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+    }
+    h1, h2, h3 {
         line-height: 1.2;
     }
     hr {
@@ -81,10 +88,10 @@ if shared_data:
 # --- Banner ---
 with st.container():
     st.markdown("<div class='banner-bg'>", unsafe_allow_html=True)
-    st_lottie(banner_lottie, height=150, key="banner")
+    st_lottie(banner_lottie, height=160, key="banner")
     st.markdown("""
-        <h1>🌱 AppSeed</h1>
-        <p style='font-size: 1.1em;'>Plant your idea. Grow full concepts side-by-side.</p>
+        <h1 style='color: white;'>🌱 AppSeed</h1>
+        <p style='font-size: 1.2em; color: white;'>Plant your idea. Grow full concepts side-by-side.</p>
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -133,8 +140,6 @@ with st.form("app_idea_form"):
 def generate_prompt(fmt, idea, category, audience, tone):
     if fmt == "App":
         return f"""
-You are a creative app concept generator...
-
 App Idea: {idea}
 Category: {category}
 Target Audience: {audience}
@@ -151,8 +156,6 @@ Return:
 - 🧠 **Tips You Might Not Have Considered:**"""
     elif fmt == "Chatbot":
         return f"""
-You are an expert chatbot architect...
-
 Idea: {idea}
 Category: {category}
 Target Audience: {audience}
@@ -167,8 +170,6 @@ Return:
 - 🧠 **Tips:**"""
     elif fmt == "Website":
         return f"""
-You're a full-stack strategist helping someone build a site...
-
 Website Idea: {idea}
 Category: {category}
 Target Audience: {audience}
@@ -212,7 +213,6 @@ if st.session_state.get("results"):
 
         with st.container():
             st.markdown("<div class='output-box'>", unsafe_allow_html=True)
-            st.markdown(result, unsafe_allow_html=True)
 
             view_mode = st.radio(
                 f"📄 View mode for {fmt}",
@@ -224,6 +224,8 @@ if st.session_state.get("results"):
 
             if view_mode == "Raw Markdown":
                 st.code(result, language="markdown")
+            else:
+                st.markdown(f"<div class='preview-card'>{result}</div>", unsafe_allow_html=True)
 
             st.download_button(
                 f"📥 Download {fmt}",
@@ -239,7 +241,7 @@ if st.session_state.get("results"):
                     f.write(result)
                 st.success(f"Saved to {filename}")
 
-            # 📋 Fancy Copy Button
+            # 📋 Fancy Copy to Clipboard
             st.markdown(f"""
                 <textarea id="copy_target_{key_base}" style="opacity:0; position:absolute;">{result}</textarea>
                 <button onclick="navigator.clipboard.writeText(document.getElementById('copy_target_{key_base}').value)" style="
