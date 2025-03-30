@@ -4,7 +4,6 @@ import json
 import os
 import urllib.parse
 import datetime
-import pyperclip  # Requires `pip install pyperclip`
 from streamlit_lottie import st_lottie
 from PIL import Image
 
@@ -25,8 +24,6 @@ st.markdown("""
 <style>
     html, body {
         background-color: #f5f7fb;
-        margin: 0;
-        padding: 0;
         font-family: 'Segoe UI', sans-serif;
         line-height: 1.6;
     }
@@ -70,7 +67,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- Optional Load from Shared JSON ---
+# --- Optional: Load Shared Data from URL ---
 shared_data = st.query_params.get("data")
 if shared_data:
     try:
@@ -91,7 +88,7 @@ with st.container():
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# --- App Inputs ---
+# --- Inputs Form ---
 st.markdown("## 🧠 Describe Your Idea")
 with st.form("app_idea_form"):
     all_formats = ["App", "Chatbot", "Website"]
@@ -105,7 +102,6 @@ with st.form("app_idea_form"):
     tone = st.radio("🎭 Tone", ["Serious", "Playful"], index=0)
 
     uploaded_json = st.file_uploader("📂 Load Shared AppSeed JSON (optional)", type=["json"])
-
     submitted = st.form_submit_button("✨ Generate Concepts")
 
     if uploaded_json:
@@ -135,8 +131,56 @@ with st.form("app_idea_form"):
 
 # --- Prompt Generator ---
 def generate_prompt(fmt, idea, category, audience, tone):
-    # (same prompt structure you already had)
-    ...
+    if fmt == "App":
+        return f"""
+You are a creative app concept generator...
+
+App Idea: {idea}
+Category: {category}
+Target Audience: {audience}
+Tone: {tone}
+
+Return:
+- 🔤 **App Name & Tagline:**
+- 📘 **Description:**
+- 🧩 **Core Features (MVP):**
+- 🚀 **Core Features (Full Version):**
+- 👥 **Ideal Users:**
+- 🧭 **User Flow Sketch:**
+- 🛠️ **Technology Stack Suggestion (MVP):**
+- 🧠 **Tips You Might Not Have Considered:**"""
+    elif fmt == "Chatbot":
+        return f"""
+You are an expert chatbot architect...
+
+Idea: {idea}
+Category: {category}
+Target Audience: {audience}
+Tone: {tone}
+
+Return:
+- 🤖 **Chatbot Name & Personality:**
+- 🎯 **Use Cases:**
+- 🧠 **Functions:**
+- 💬 **Sample Dialogues:**
+- ⚠️ **Edge Cases:**
+- 🧠 **Tips:**"""
+    elif fmt == "Website":
+        return f"""
+You're a full-stack strategist helping someone build a site...
+
+Website Idea: {idea}
+Category: {category}
+Target Audience: {audience}
+Tone: {tone}
+
+Return:
+- 🌐 **Name & Purpose:**
+- 📄 **Pages & Workflow:**
+- 🧩 **UI Elements:**
+- 🛠️ **Tech Stack:**
+- ⚙️ **Features:**
+- 🧠 **Tips:**"""
 
 # --- Generate Results ---
 if submitted and st.session_state.inputs:
@@ -195,16 +239,26 @@ if st.session_state.get("results"):
                     f.write(result)
                 st.success(f"Saved to {filename}")
 
-            # Copy to clipboard (fallback method via text area)
-            st.text_area(f"📋 Copy {fmt}", result, key=f"{key_base}_copy")
+            # 📋 Fancy Copy Button
+            st.markdown(f"""
+                <textarea id="copy_target_{key_base}" style="opacity:0; position:absolute;">{result}</textarea>
+                <button onclick="navigator.clipboard.writeText(document.getElementById('copy_target_{key_base}').value)" style="
+                    background-color: #f0f0f0;
+                    border: 1px solid #ccc;
+                    padding: 0.4em 1em;
+                    border-radius: 6px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    margin-top: 10px;
+                ">📋 Copy to Clipboard</button>
+            """, unsafe_allow_html=True)
 
             st.markdown("</div>", unsafe_allow_html=True)
-
             st.markdown("<hr>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- Share Features ---
+    # --- Share + Download Full Session ---
     if st.button("🔗 Share This Page"):
         share_payload = {
             "inputs": st.session_state.inputs,
