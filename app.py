@@ -23,7 +23,7 @@ banner_lottie = load_lottie_file("assets/banner.json")
 st.markdown("""
 <style>
     html, body {
-        background-color: #f5f7fb;
+        background-color: #f3fdf6;
         font-family: 'Segoe UI', sans-serif;
         line-height: 1.6;
     }
@@ -43,28 +43,21 @@ st.markdown("""
     }
     .output-box {
         background-color: white;
-        padding: 2%;
+        padding: 2rem;
         border-radius: 16px;
         box-shadow: 0 2px 12px rgba(0,0,0,0.05);
         width: 96%;
         margin: 0 auto;
     }
-    .preview-card {
-        background-color: #ffffff;
-        padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 1px 8px rgba(0,0,0,0.04);
-    }
-    .banner-bg {
-        background: linear-gradient(135deg, #3ECF8E, #0061ff);
-        border-radius: 20px;
-        padding: 3rem 1rem;
-        margin-bottom: 2rem;
+    .title-header {
         text-align: center;
-        position: relative;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
     }
-    h1, h2, h3 {
-        line-height: 1.2;
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
     }
     hr {
         border: none;
@@ -85,13 +78,13 @@ if shared_data:
     except Exception:
         st.warning("⚠️ Failed to load shared data.")
 
-# --- Banner ---
+# --- App Header + Lottie ---
 with st.container():
-    st.markdown("<div class='banner-bg'>", unsafe_allow_html=True)
-    st_lottie(banner_lottie, height=160, key="banner")
+    st.markdown("<div class='title-header'>", unsafe_allow_html=True)
+    st_lottie(banner_lottie, height=150, key="banner")
     st.markdown("""
-        <h1 style='color: white;'>🌱 AppSeed</h1>
-        <p style='font-size: 1.2em; color: white;'>Plant your idea. Grow full concepts side-by-side.</p>
+        <h1>🌱 AppSeed</h1>
+        <p style='font-size: 1.1em; color: #444;'>Plant your idea. Grow full concepts side-by-side.</p>
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -197,7 +190,7 @@ if submitted and st.session_state.inputs:
             )
             try:
                 response = model.generate_content(prompt)
-                result_text = f"### 🛠️ Output Format: {fmt}\n\n{response.text}"
+                result_text = response.text
                 st.session_state.results[fmt] = result_text
             except Exception as e:
                 st.session_state.results[fmt] = f"❌ Error generating {fmt}:\n```\n{e}\n```"
@@ -214,6 +207,13 @@ if st.session_state.get("results"):
         with st.container():
             st.markdown("<div class='output-box'>", unsafe_allow_html=True)
 
+            # Section Title (no weird ####, just styled HTML)
+            st.markdown(f"<div class='section-title'>🛠️ Output Format: {fmt}</div>", unsafe_allow_html=True)
+
+            # Preview Markdown
+            st.markdown(result, unsafe_allow_html=True)
+
+            # View toggle (after result)
             view_mode = st.radio(
                 f"📄 View mode for {fmt}",
                 ["Preview", "Raw Markdown"],
@@ -221,12 +221,10 @@ if st.session_state.get("results"):
                 index=0,
                 horizontal=True
             )
-
             if view_mode == "Raw Markdown":
                 st.code(result, language="markdown")
-            else:
-                st.markdown(f"<div class='preview-card'>{result}</div>", unsafe_allow_html=True)
 
+            # Download & Save
             st.download_button(
                 f"📥 Download {fmt}",
                 result,
@@ -241,26 +239,12 @@ if st.session_state.get("results"):
                     f.write(result)
                 st.success(f"Saved to {filename}")
 
-            # 📋 Fancy Copy to Clipboard
-            st.markdown(f"""
-                <textarea id="copy_target_{key_base}" style="opacity:0; position:absolute;">{result}</textarea>
-                <button onclick="navigator.clipboard.writeText(document.getElementById('copy_target_{key_base}').value)" style="
-                    background-color: #f0f0f0;
-                    border: 1px solid #ccc;
-                    padding: 0.4em 1em;
-                    border-radius: 6px;
-                    font-weight: bold;
-                    cursor: pointer;
-                    margin-top: 10px;
-                ">📋 Copy to Clipboard</button>
-            """, unsafe_allow_html=True)
-
             st.markdown("</div>", unsafe_allow_html=True)
             st.markdown("<hr>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- Share + Download Full Session ---
+    # --- Share & Download Session ---
     if st.button("🔗 Share This Page"):
         share_payload = {
             "inputs": st.session_state.inputs,
