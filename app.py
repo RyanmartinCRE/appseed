@@ -18,7 +18,7 @@ def load_lottie_file(filepath):
 banner_lottie = load_lottie_file("assets/banner.json")
 st_lottie(banner_lottie, height=200, key="banner")
 
-# --- Custom CSS for responsive layout ---
+# --- Custom CSS ---
 st.markdown("""
 <style>
     html, body {
@@ -57,7 +57,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- App Title ---
+# --- Title ---
 st.markdown("""
 <div style='text-align: center; padding-top: 10px;'>
     <h1 style='font-size: 2.5em;
@@ -69,29 +69,25 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# --- App Form ---
+# --- Form ---
 with st.form("app_idea_form"):
-    number_of_outputs = st.selectbox("🔢 How many formats do you want to generate?", [1, 2, 3])
     all_formats = ["App", "Chatbot", "Website"]
-    selected_formats = st.multiselect(
-        "🛠️ Select output formats",
-        all_formats,
-        default=["App"]
-    )
+    selected_formats = st.multiselect("🛠️ Select output formats", all_formats, default=["App"])
 
     category = st.selectbox("📂 Choose a category", [
         "Productivity", "Social", "Finance", "Health", "Education", "Fun / Playful", "AI / Tools", "Other"
     ])
+
     app_idea = st.text_area("💡 App Idea", placeholder="An AI-powered accountability buddy that keeps you focused...")
     target_audience = st.text_input("🎯 Target Audience (optional)")
     tone = st.radio("🎭 Tone", ["Serious", "Playful"], index=0)
 
     submitted = st.form_submit_button("✨ Generate Concepts")
 
-    # ✅ Validation (must be after submit button inside the form)
+    # --- Validation ---
     if submitted:
-        if len(selected_formats) > int(number_of_outputs):
-            st.warning(f"⚠️ Please select up to {number_of_outputs} formats.")
+        if not app_idea.strip():
+            st.warning("⚠️ Please enter an app idea before generating.")
             st.stop()
 
         if len(selected_formats) == 0:
