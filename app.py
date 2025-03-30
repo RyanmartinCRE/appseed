@@ -79,21 +79,24 @@ with st.form("app_idea_form"):
         default=["App"]
     )
 
-    if len(selected_formats) > int(number_of_outputs):
-        st.warning(f"⚠️ Please select up to {number_of_outputs} formats.")
-        st.stop()
-
-    if len(selected_formats) == 0:
-        st.warning("⚠️ Please select at least one output format.")
-        st.stop()
-
     category = st.selectbox("📂 Choose a category", [
         "Productivity", "Social", "Finance", "Health", "Education", "Fun / Playful", "AI / Tools", "Other"
     ])
     app_idea = st.text_area("💡 App Idea", placeholder="An AI-powered accountability buddy that keeps you focused...")
     target_audience = st.text_input("🎯 Target Audience (optional)")
     tone = st.radio("🎭 Tone", ["Serious", "Playful"], index=0)
+
     submitted = st.form_submit_button("✨ Generate Concepts")
+
+    # ✅ Validation (must be after submit button inside the form)
+    if submitted:
+        if len(selected_formats) > int(number_of_outputs):
+            st.warning(f"⚠️ Please select up to {number_of_outputs} formats.")
+            st.stop()
+
+        if len(selected_formats) == 0:
+            st.warning("⚠️ Please select at least one output format.")
+            st.stop()
 
 # --- Prompt Generator ---
 def generate_prompt(output_format, idea, category, audience, tone):
@@ -152,7 +155,7 @@ Return this markdown format:
 """
 
 # --- Generate & Store Responses ---
-if submitted and app_idea.strip():
+if submitted and app_idea.strip() and selected_formats:
     with st.spinner("🌟 Generating your concepts..."):
         st.session_state.results = {}
         for fmt in selected_formats:
